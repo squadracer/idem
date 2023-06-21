@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="popup.css"/>
+  </head>
+
+<body>
+  <div class="title">idem (v0.1)</div>
+  <div id="popup-load">
+    <div class="button">Loading...</div>
+  </div>
+  <div id="conf" class="flex">
+    <div id="tab_conf" class="container one">
+      <h3>Tab conf</h3>
+      <button id="popup-tab-initialize" class="" action="tab_initialize" disabled title="Configure the tab you plan to play cg.">Init for this tab</button>
+      <button id="popup-tab-configured" class="" action="tab_goto" disabled>Go to configured tab</button>
+    </div>
+    <div id="twitch" class="container one">
+      <h3>Twitch</h3>
+      <div id="popup-twitch-connect">
+        <div>
+          <input id='twitch_channel' value="688213995" placeholder='channel id' title="For now you need to find the id of the channel. Maybe we'll change for the name ! Default to Squadracer" />
+        </div>
+				<button id='twitch_button' class="twitch" action="twitch_connect">Connect to twitch</button>
+      </div>
+    </div>
+  </div>
+  <div id="popup-ide-actions" class="container">
+    <button id="ide_manual_action_id" class="" action="ide_manual" disabled title="Because the dev is not as good as he would like, you can manually play the actions ! But note that the behavior is unexpected if not in ide of cg">IDE manual actions</button>
+    <div id="popup-ide-manual" class="hidden" disabled>
+      <div class="flex gap">
+        <button class="cg cg-blue" action="ide_activate">Activate ide</button>
+        <button class="cg cg-blue" action="ide_deactivate">Deactivate ide</button>
+        <button class="cg cg-yellow" action="ide_clear">Clear ide</button>
+        <button class="cg cg-yellow" action="ide_rotate">Rotate ide</button>
+      </div>
+      <div class="flex gap">
+        <button class="cg cg-yellow" action="ide_swap_submit">Swap Submit</button>
+        <button class="cg cg-yellow" action="ide_deactivate_submit">Deactivate Submit</button>
+        <button class="cg cg-blue" action="ide_deactivate_test">(De)activate Test</button>
+      </div>
+      <div class="flex gap">
+        <button class="cg cg-blue" action="ide_block_letter">Block letter</button>
+        <input id='letter' maxlength=1 placeholder="a letter or empty to reset"></input>
+      </div>
+    </div>
+  </div>
+  <div id="popup-ide-actions-pending" class="container"></div>
+  <div id="popup-error" class="hidden">
+    <p>idem cannot be loaded in this web page.</p><p>Try a different page.</p>
+  </div>
+  <div id="popup-log-container" class="container">
+    <button id="log_activate_action_id" class="" action="log_activate" title="Reserved for the dev, to track bugs :)">Activate Logs</button>
+    <textarea id="popup-log" class="hidden" rows=20 wrap="off">
+      Logs
+    </textarea>
+  </div>
+  <script src="popup.js"></script>
+</body>
+
+</html>
