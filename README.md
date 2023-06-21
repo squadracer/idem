@@ -1,4 +1,4 @@
-# cgideconnector
+# idem
 
 ## What it does ##
 
@@ -20,22 +20,22 @@
 ## TODO ##
 
 - [ ] Finish swap submit action : swap image color. Hard because cannot access easily pseudo element
-- [ ] fix swap and deactivate submit position conflict ?
+- [ ] fix swap and deactivate submit position conflict ?
 - [x] detect ide page to inject script and apply buffered actions
-- [ ] avoid duplicate buffered actions ?
-- [ ] connect to twitch by channel name
-- [ ] connect correctly to twitch and handle errors
+- [ ] avoid duplicate buffered actions ?
+- [ ] connect to twitch by channel name
+- [ ] connect correctly to twitch and handle errors
 - [x] badge on popup logo
 - [x] popup logo
-- [ ] better popup logo
+- [ ] better popup logo
 - [x] buffered actions list in popup
-- [ ] css buffered actions list in popup
-- [ ] manual extension configuration to map twitch message to action
-- [ ] fix firefox error log when hovering popup logo
-- [ ] manifest v3. hard cause of websocket. need a workaround
-- [ ] chrome compatibility. hard cause of manifest v3
+- [ ] css buffered actions list in popup
+- [ ] manual extension configuration to map twitch message to action
+- [ ] fix firefox error log when hovering popup logo
+- [ ] manifest v3. hard cause of websocket. need a workaround
+- [ ] chrome compatibility. hard cause of manifest v3
 - [x] give extension more permission ? extension lose activetab permission when reloading the page => unable to load content script without user interaction on the extension !
-- [ ] handle refresh ? restore current actions of current clash ? no for now !
+- [ ] handle refresh ? restore current actions of current clash ? no for now !
 
 ## How to build ##
 ```bash
