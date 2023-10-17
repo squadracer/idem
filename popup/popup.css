@@ -106,7 +106,15 @@ input {
   color: white
 }
 
+.join-tournament:hover {
+  background-color: rgba(242, 187, 19, 0.7);
+  border-color: rgba(242, 187, 19, 0.7);
+}
 
+.join-tournament {
+  background-color: rgb(242, 187, 19);
+  border-color: rgb(242, 187, 19);
+}
 
 textarea {
   margin-top: 10px;

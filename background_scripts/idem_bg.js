@@ -49,6 +49,17 @@ const actions = {
 		return _buffer
 	},
 
+	join_tournament: function() {
+		console.log("joining Tournament");
+		fetch("http://localhost:3000/tournaments/join", {
+			method: "POST",
+      headers: {
+        'Content-Type': 'application/json'
+      },
+			body: JSON.stringify({name: "Extension"}),
+		});
+	},
+
 	twitch_connect: function(channel) {
 		const status = _twitch?.status
 		if (status == 'CONNECTING' || status === 'OPEN') {
