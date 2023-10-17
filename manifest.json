@@ -15,7 +15,7 @@
   ],
 
   "background": {
-    "scripts": ["background_scripts/idem_ws.js", "background_scripts/idem_bg.js"],
+    "scripts": ["background_scripts/idem_ws.js", "background_scripts/idem_bg.js", "background_scripts/toc_ws.js"],
     "persistent": true // in order to keep background script running and so ws. see how to with manifest v3
   },
 

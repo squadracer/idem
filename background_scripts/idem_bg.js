@@ -5,6 +5,7 @@ const _buffer = []
 
 const actions = {
   log_activate: function () {
+    _toc_ws = new ToCWS()
     _log = true
     if (!_tabId) return
     browser.tabs.sendMessage(_tabId, {
@@ -144,6 +145,9 @@ const actions = {
     sendMessage({
       command: 'ide_deactivate_test'
     })
+  },
+  update_tournament_status: function () {
+    console.log('update_tournament_status')
   }
 }
 
