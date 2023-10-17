@@ -139,7 +139,19 @@ const actions = {
       }
     )
   },
-
+  join_tournament: function () {
+    browser.runtime.sendMessage(
+      {
+        command: 'join_tournament'
+      },
+      r => {
+        log('DEBUG', r)
+        if (r.res == 'ack') {
+          document.querySelector('#join_tournament').disabled = true
+        }
+      }
+    )
+  },
   /////////////////////////////////////////////////////
   // ide
   ide_manual: function () {
