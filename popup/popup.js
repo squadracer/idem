@@ -147,7 +147,20 @@ const actions = {
       r => {
         log('DEBUG', r)
         if (r.res == 'ack') {
-          document.querySelector('#join_tournament').disabled = true
+          update_tournaments()
+        }
+      }
+    )
+  },
+  search_tournament: function () {
+    browser.runtime.sendMessage(
+      {
+        command: 'search_tournament'
+      },
+      r => {
+        log('DEBUG', r)
+        if (r.res == 'ack') {
+          update_tournaments()
         }
       }
     )
@@ -292,6 +305,21 @@ function load_cg_id () {
   })
 }
 load_cg_id()
+
+function update_tournaments () {
+  console.log('update_tournaments')
+  browser.runtime.sendMessage({ command: 'get_tournament_infos' }, r => {
+    console.log('get_tournament_infos response :', r)
+    if (r.res === 'obj') {
+      const active = !!r.obj?.current_tournament?.id
+      const joined = !!r.obj?.joined_tournament?.id
+      document.querySelector('#search_tournament_button').disabled = active
+      document.querySelector('#join_tournament_button').disabled =
+        joined || !active
+    }
+  })
+}
+update_tournaments()
 
 function update_action_pending (message) {
   if (!message?.obj?.length) return

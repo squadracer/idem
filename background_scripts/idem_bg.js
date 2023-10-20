@@ -2,10 +2,20 @@ let _ws, _twitch, _tabId, _ide, _log
 let _cg_id
 const SKIP_IDE_DETECTION = false
 const _buffer = []
+const TOC_URL = 'http://localhost:3000'
+let _current_tournament
+let _joined_tournament
+
+function fetch_toc_api (path, method = 'GET', payload) {
+  return fetch(`${TOC_URL}/api${path}`, {
+    method,
+    headers: { 'Content-Type': 'application/json' },
+    body: !!payload ? JSON.stringify(payload) : undefined
+  }).then(response => response.json())
+}
 
 const actions = {
   log_activate: function () {
-    _toc_ws = new ToCWS()
     _log = true
     if (!_tabId) return
     browser.tabs.sendMessage(_tabId, {
@@ -69,14 +79,33 @@ const actions = {
     return _buffer
   },
 
+  search_tournament: function () {
+    console.log('Searching tournaments...')
+    fetch_toc_api('/tournaments').then(data => {
+      console.log('Available tournaments :', data)
+      _current_tournament = data.tournament
+      if (!!_current_tournament) _joined_tournament = undefined
+    })
+  },
+
+  get_tournament_infos: function () {
+    return {
+      current_tournament: _current_tournament,
+      joined_tournament: _joined_tournament
+    }
+  },
+
   join_tournament: function () {
-    console.log('joining Tournament')
-    fetch('http://localhost:3000/tournaments/join', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ name: 'Extension' })
+    console.log('Joining tournament')
+    fetch_toc_api(`/tournaments/${_current_tournament.id}/join`, 'POST', {
+      contestant: {
+        codingame_id: _cg_id.userId,
+        name: _cg_id.pseudo,
+        codingame_public_handle: _cg_id.publicHandle
+      }
+    }).then(data => {
+      console.log(data)
+      _joined_tournament = data.tournament
     })
   },
 
@@ -314,5 +343,9 @@ browser.runtime.onSuspend.addListener(e => {
 //browser.webNavigation.onCompleted.addListener(e => {
 //  console.log("navigation", e);
 //})
+
+actions.search_tournament()
+
+_toc_ws = new ToCWS()
 
 console.log('background loaded')
