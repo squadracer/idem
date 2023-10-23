@@ -28,14 +28,16 @@ Array []
 */
 class TwitchWS {
 
-    #_channel
+    #_channelName
+    #_channelId
     #_actions
     #_ws
     #_topic
     #_heartbeatJob
 
-    constructor(channel, actions) {
-        this.#_channel = channel
+    constructor(channelName, channelId, actions) {
+        this.#_channelName = channelName
+        this.#_channelId = channelId
         this.#_actions = actions
         // to try to get specific message
         // wss://pubsub-edge.twitch.tv/v1
@@ -46,7 +48,7 @@ class TwitchWS {
         this.#_ws = new WebSocket('wss://pubsub-edge.twitch.tv/v1')
         // TODO. find a simple way to retrieve channel id from name
         // squadracer => 688213995
-        this.#_topic = `community-points-channel-v1.${this.#_channel}`
+        this.#_topic = `community-points-channel-v1.${this.#_channelId}`
         
         this.#onOpen()
         this.#onMessage()
@@ -58,7 +60,7 @@ class TwitchWS {
         return ['CONNECTING', 'OPEN', 'CLOSING', 'CLOSED'][this.#_ws.readyState]
     }
     get channel() {
-        return this.#_channel
+        return {channelId: this.#_channelId, channelName: this.#_channelName}
     }
     close() {
         this.#_ws.close()
@@ -68,10 +70,10 @@ class TwitchWS {
     }
 
     // private
-	#heartbeat() {
+    #heartbeat() {
         this.sendMessage({type: 'PING'})
     }
-	#listen() {
+    #listen() {
         this.sendMessage({"type": "LISTEN", "nonce": "only_one", "data": {"topics": [this.#_topic]}})
     }
 
@@ -97,7 +99,7 @@ class TwitchWS {
     }
 
     // websocket callback
-	#onOpen() {
+    #onOpen() {
         this.#_ws.onopen = event => {
             if (_log) console.log('open', JSON.stringify(event))
     
@@ -110,9 +112,9 @@ class TwitchWS {
             this.#_heartbeatJob = setInterval(() => this.#heartbeat(), 1000 * 290) // every 4min50
             this.#listen()
         }
-	}
+    }
 
-	#onMessage() {
+    #onMessage() {
         this.#_ws.onmessage = event => {
             if (_log) console.log('message [ ', JSON.stringify(event), ']', event.data, '|', event.origin, event.lastEventId, event.source, event.ports)
             const data = JSON.parse(event.data)
@@ -148,20 +150,56 @@ class TwitchWS {
                     break
             }
         }
-	}
-	
-	#onError() {
+    }
+    
+    #onError() {
         this.#_ws.onerror = event => {
             console.log('error', JSON.stringify(event))
         }
-	}
-	
-	#onClose() {
+    }
+    
+    #onClose() {
         this.#_ws.onclose = event => {
             if (_log) console.log('close', JSON.stringify(event), event.code, event.reason, event.wasClean)
             clearInterval(this.#_heartbeatJob)
             this.#_actions.twitch_deconnect()
         }
-	}
+    }
 
+    // exemple of valid response
+    /*
+    {"data":
+        {"streamPlaybackAccessToken":
+        {"value":"{\"adblock\":false,\"authorization\":{\"forbidden\":false,\"reason\":\"\"},\"blackout_enabled\":false,\"channel\":\"talmo\",\"channel_id\":74097186,\"chansub\":{\"restricted_bitrates\":[],\"view_until\":1924905600},\"ci_gb\":false,\"geoblock_reason\":\"\",\"device_id\":null,\"expires\":1697541189,\"extended_history_allowed\":false,\"game\":\"\",\"hide_ads\":false,\"https_required\":true,\"mature\":false,\"partner\":false,\"platform\":\"web\",\"player_type\":\"site\",\"private\":{\"allowed_to_view\":true},\"privileged\":false,\"role\":\"\",\"server_ads\":true,\"show_ads\":true,\"subscriber\":false,\"turbo\":false,\"user_id\":null,\"user_ip\":\"77.205.21.121\",\"version\":2}",
+        "signature":"0d807bc33a6d2aa2b766faafcfb37c8904f5825a",
+        "authorization":{"isForbidden":false,"forbiddenReasonCode":"NONE"},
+        "__typename":"PlaybackAccessToken"}
+        },
+        "extensions":{"durationMilliseconds":61,"operationName":"PlaybackAccessToken_Template","requestID":"01HCYM97Y53SGK5ZEGX93W2H5W"}
+    }
+    */
+    static async channelNameToId(channelName) {
+        const body = `{
+            "operationName": "PlaybackAccessToken_Template",
+            "query": "query PlaybackAccessToken_Template($login: String!, $isLive: Boolean!, $vodID: ID!, $isVod: Boolean!, $playerType: String!) {  streamPlaybackAccessToken(channelName: $login, params: {platform: \\"web\\", playerBackend: \\"mediaplayer\\", playerType: $playerType}) @include(if: $isLive) {    value    signature   authorization { isForbidden forbiddenReasonCode }   __typename  }  videoPlaybackAccessToken(id: $vodID, params: {platform: \\"web\\", playerBackend: \\"mediaplayer\\", playerType: $playerType}) @include(if: $isVod) {    value    signature   __typename  }}",
+            "variables": {
+                "isLive": true,
+                "login": "${channelName}",
+                "isVod": false,
+                "vodID": "",
+                "playerType": "site"
+            }
+        }`
+        const response = await fetch("https://gql.twitch.tv/gql", { headers: {'Client-ID': 'kimne78kx3ncx6brgo4mv6wki5h1ko'}, method: 'POST', body: body })
+        const json = await response.json()
+        const value = json.data?.streamPlaybackAccessToken?.value
+        if (value) {
+            const channelId = JSON.parse(value).channel_id
+            if (channelId) return channelId
+        }
+        console.log(response, json)
+        throw new Error(`Channel id of ${channelName} not found`)
+    }
 }
+
+console.log('twitch ws loaded')

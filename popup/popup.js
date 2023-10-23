@@ -96,23 +96,20 @@ const actions = {
   /////////////////////////////////////////////////////
   // twitch
   twitch_connect: function () {
-    const channel = document.querySelector('#twitch_channel').value
-    if (channel) {
-      log('DEBUG', `Connecting to twitch channel [${channel}]`)
+    const channelName = document.querySelector('#twitch_channel').value
+    if (channelName) {
+      log('DEBUG', `Connecting to twitch channel [${channelName}]`)
       browser.runtime.sendMessage(
         {
           command: 'twitch_connect',
-          obj: channel
+          obj: channelName
         },
         r => {
           log('DEBUG', r)
-          if (r.res == 'ack') {
+          if (r.res != 'error') {
             document.querySelector('#twitch_channel').disabled = true
-            document.querySelector('#twitch_button').textContent =
-              'Deconnect from twitch'
-            document
-              .querySelector('#twitch_button')
-              .setAttribute('action', 'twitch_deconnect')
+            document.querySelector('#twitch_button').disabled = true
+            document.querySelector('#twitch_button').textContent = 'Connecting...'
           }
         }
       )
@@ -129,6 +126,7 @@ const actions = {
         log('DEBUG', r)
         if (r.res == 'ack') {
           document.querySelector('#twitch_channel').disabled = false
+          document.querySelector('#twitch_channel').title = 'The name of your twitch channel. It will be converted to your channel id'
           document.querySelector('#twitch_button').textContent =
             'Connect to twitch'
           document
@@ -243,28 +241,35 @@ browser.runtime.sendMessage(
   }
 )
 
+function update_twitch_status (message) {
+  const [status, channel] = message?.obj
+  if (status === 'CONNECTING' || status === 'OPEN') {
+    document.querySelector('#twitch_channel').disabled = true
+    document.querySelector('#twitch_channel').value = channel.channelName
+    document.querySelector('#twitch_channel').title = channel.channelId
+    document.querySelector('#twitch_button').disabled = false
+    document.querySelector('#twitch_button').textContent =
+      'Deconnect from twitch'
+    document
+      .querySelector('#twitch_button')
+      .setAttribute('action', 'twitch_deconnect')
+  } else {
+    document.querySelector('#twitch_channel').disabled = false
+    document.querySelector('#twitch_channel').title = 'The name of your twitch channel. It will be converted to your channel id'
+    document.querySelector('#twitch_button').disabled = false
+    document.querySelector('#twitch_button').textContent = 'Connect to twitch'
+    document
+      .querySelector('#twitch_button')
+      .setAttribute('action', 'twitch_connect')
+  }
+}
 browser.runtime.sendMessage(
   {
     command: 'twitch_get_status'
   },
   r => {
     log('DEBUG', r)
-    const [status, channel] = r?.obj
-    if (status === 'CONNECTING' || status === 'OPEN') {
-      document.querySelector('#twitch_channel').value = channel
-      document.querySelector('#twitch_channel').disabled = true
-      document.querySelector('#twitch_button').textContent =
-        'Deconnect from twitch'
-      document
-        .querySelector('#twitch_button')
-        .setAttribute('action', 'twitch_deconnect')
-    } else {
-      document.querySelector('#twitch_channel').disabled = false
-      document.querySelector('#twitch_button').textContent = 'Connect to twitch'
-      document
-        .querySelector('#twitch_button')
-        .setAttribute('action', 'twitch_connect')
-    }
+    update_twitch_status(r)
   }
 )
 
@@ -309,13 +314,20 @@ browser.runtime.onMessage.addListener(function messageListener (
   sender,
   reply
 ) {
-  log('debug', ['onMessage', message, sender, reply])
+  log('DEBUG', ['onMessage', message, sender, reply])
   switch(message.command) {
     case 'buffer_change':
       update_action_pending(message)
       break
     case 'cg_id_change':
       update_cg_id(message)
+      break
+    case 'twitch_error':
+      log('ERROR', message)
+      // TODO display error on popup
+      // FALLTHROUGH
+    case 'twitch_change':
+      update_twitch_status(message)
       break
     default:
       log('ERROR', {'unkown command message': message})

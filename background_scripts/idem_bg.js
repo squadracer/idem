@@ -71,21 +71,40 @@ const actions = {
     return _buffer
   },
 
-  twitch_connect: function (channel) {
+  twitch_connect: function (channelName) {
     const status = _twitch?.status
     if (status == 'CONNECTING' || status === 'OPEN') {
-      return `Already connected to channel [${_twitch.channel}]`
-    } else {
-      if (!channel) return 'Empty channel'
-      _twitch = new TwitchWS(channel, actions)
-      update_idem_logo()
+      throw new Error(`Already connected to channel [${_twitch.channel}]`)
     }
+    if (!channelName) throw new Error('Empty channel')
+
+    TwitchWS.channelNameToId(channelName).then(channelId => {
+      _twitch = new TwitchWS(channelName, channelId, actions)
+      update_idem_logo()
+       // notify popup
+       browser.runtime.sendMessage({
+        command: 'twitch_change',
+        obj: this.twitch_get_status()
+      })
+    }).catch(e => {
+      console.log(e)
+      // notify popup
+      browser.runtime.sendMessage({
+       command: 'twitch_error',
+       obj: e.toString()
+     })
+    })
   },
 
   twitch_deconnect: function () {
     _twitch?.close()
     _twitch = null
     update_idem_logo()
+    // notify popup
+    browser.runtime.sendMessage({
+      command: 'twitch_change',
+      obj: this.twitch_get_status()
+    })
   },
 
   twitch_get_status: function () {
@@ -119,7 +138,7 @@ const actions = {
         obj: letter
       })
     else {
-      log('ERROR', `Too much letters in [${letter}]`)
+      console.log('ERROR', `Too much letters in [${letter}]`)
     }
   },
   ide_swap_submit: function () {
