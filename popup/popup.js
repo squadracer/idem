@@ -88,9 +88,8 @@ const actions = {
     )
   },
   tab_find_id: function () {
-    console.log('popup.js: tab_find_id')
-    browser.runtime.sendMessage({ command: 'tab_find_id' }, r => {
-      load_cg_id()
+    sendMessage({
+      command: 'tab_find_id'
     })
   },
 
@@ -294,17 +293,16 @@ browser.runtime.sendMessage(
   }
 )
 
-function load_cg_id () {
-  console.log('load_cg_id')
-  browser.runtime.sendMessage({ command: 'get_cg_id' }, r => {
-    console.log('load_cg_id get_cg_id response :', r)
-    document.querySelector('#identifiers').innerHTML =
-      r.res === 'obj'
-        ? `${r.obj.pseudo} (${r.obj.userId}) - ${r.obj.publicHandle}`
-        : 'CodinGame identifiers not found'
-  })
+function update_cg_id (message) {
+  document.querySelector('#identifiers').innerHTML =
+    message.obj
+      ? `${message.obj.pseudo} (${message.obj.userId}) - ${message.obj.publicHandle}`
+      : 'Codingame identifiers not found'
 }
-load_cg_id()
+browser.runtime.sendMessage({ command: 'get_cg_id' }, r => {
+  log('DEBUG', r)
+  update_cg_id(r)
+})
 
 function update_tournaments () {
   console.log('update_tournaments')
@@ -352,10 +350,15 @@ browser.runtime.onMessage.addListener(function messageListener (
   reply
 ) {
   log('debug', ['onMessage', message, sender, reply])
-  if (message.command === 'buffer_change') {
-    update_action_pending(message)
-  } else {
-    log('ERROR', 'unkown command message')
+  switch(message.command) {
+    case 'buffer_change':
+      update_action_pending(message)
+      break
+    case 'cg_id_change':
+      update_cg_id(message)
+      break
+    default:
+      log('ERROR', {'unkown command message': message})
   }
 })
 

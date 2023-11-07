@@ -59,7 +59,6 @@ const actions = {
   },
 
   tab_find_id: function () {
-    console.log('idem_bg.js: tab_find_id')
     ensureScriptLoaded().then(() => {
       browser.tabs.sendMessage(
         _tabId,
@@ -67,9 +66,13 @@ const actions = {
           command: 'tab_find_id'
         },
         function (r) {
-          console.log('Response from idem.js:', r)
           if (r.res === 'obj') _cg_id = r.obj
           else _cg_id = undefined
+          // notify popup. This handle asynchronus problem of Promise
+          browser.runtime.sendMessage({
+            command: 'cg_id_change',
+            obj: _cg_id
+          })
         }
       )
     })
@@ -199,7 +202,7 @@ browser.runtime.onMessage.addListener(function messageListener (
 
 function ensureScriptLoaded () {
   return new Promise((resolve, reject) => {
-    if (_log) console.log('step 1')
+    if (_log) console.log('step 1, get status from tab', _tabId)
     try {
       browser.tabs.sendMessage(
         _tabId,
