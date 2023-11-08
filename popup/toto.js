@@ -1,7 +1,7 @@
 browser.windows.create({
   url: 'popup.html',
   type: 'popup',
-  height: 800,
-  width: 600,
+  width: 640,
+  height: 480,
   focused: true
 })
