@@ -70,7 +70,6 @@ const actions = {
         log('DEBUG', r)
         if (r?.res == 'ack') {
           document.querySelector('#popup-tab-configured').disabled = false
-          document.querySelector('#popup-tab-find-id').disabled = false
           document.querySelector('#ide_manual_action_id').disabled = false
         }
       }
@@ -258,7 +257,6 @@ browser.runtime.sendMessage(
     document.querySelector('#popup-tab-initialize').disabled = false
     if (r?.obj) {
       document.querySelector('#popup-tab-configured').disabled = false
-      document.querySelector('#popup-tab-find-id').disabled = false
       browser.tabs.query({ active: true, currentWindow: true }).then(tabs => {
         if (r.obj == tabs[0].id) {
           document.querySelector('#ide_manual_action_id').disabled = false
@@ -294,6 +292,7 @@ browser.runtime.sendMessage(
 )
 
 function update_cg_id (message) {
+  console.log("show CG id");
   document.querySelector('#identifiers').innerHTML =
     message.obj
       ? `${message.obj.pseudo} (${message.obj.userId}) - ${message.obj.publicHandle}`
@@ -330,7 +329,9 @@ function update_action_pending (message) {
   pending.appendChild(ul)
   for (action of message.obj) {
     const li = document.createElement('li')
-    li.textContent = JSON.stringify(action)
+    const actionName = Object.keys(action)[0];
+    const actionValue = Object.values(action)[0];
+    li.textContent = actionName + ": " + actionValue;
     ul.appendChild(li)
   }
 }

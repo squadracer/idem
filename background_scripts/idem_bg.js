@@ -40,25 +40,13 @@ const actions = {
   },
 
   tab_initialize: function () {
+    // init for this tab
     browser.tabs.query({ currentWindow: true, active: true }).then(tabs => {
       _tabId = tabs[0].id
       _ide = SKIP_IDE_DETECTION || tabs[0].url.includes('codingame.com/ide/')
       set_idem_logo({ tabId: _tabId })
-    })
-  },
-
-  tab_goto: function () {
-    if (_tabId) {
-      // highlight to keep current tab visible ?
-      browser.tabs.update(_tabId, { highlighted: true })
-    }
-  },
-
-  get_cg_id: function () {
-    return _cg_id
-  },
-
-  tab_find_id: function () {
+    });
+    // get and save CG id
     ensureScriptLoaded().then(() => {
       browser.tabs.sendMessage(
         _tabId,
@@ -76,6 +64,17 @@ const actions = {
         }
       )
     })
+  },
+
+  tab_goto: function () {
+    if (_tabId) {
+      // highlight to keep current tab visible ?
+      browser.tabs.update(_tabId, { highlighted: true })
+    }
+  },
+
+  get_cg_id: function () {
+    return _cg_id
   },
 
   action_get_buffer: function () {

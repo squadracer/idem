@@ -55,6 +55,9 @@ button {
   border: none
 }
 button:disabled {
+  background-color: rgb(31 41 55);
+  color: rgb(62 82 110);
+  box-shadow: 0 6px #141414;
   cursor: default;
 }
 button:active {

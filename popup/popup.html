@@ -15,6 +15,7 @@
     <div id="tab_conf" class="container one">
       <h3>Tab conf</h3>
       <button id="popup-tab-initialize" class="" action="tab_initialize" disabled title="Configure the tab you plan to play cg.">Init for this tab</button>
+      <div>CG ID : <span id="identifiers"></span></div>
       <button id="popup-tab-configured" class="" action="tab_goto" disabled>Go to configured tab</button>
     </div>
     <div id="twitch" class="container one">
@@ -26,13 +27,6 @@
 				<button id='twitch_button' class="twitch" action="twitch_connect">Connect to twitch</button>
         <button id='search_tournament_button' class="join-tournament" disabled action="search_tournament">Search tournament!</button>
         <button id='join_tournament_button' class="join-tournament" disabled action="join_tournament">Join tournament!</button>
-      </div>
-    </div>
-      <div id="cg" class="container one">
-      <h3>Codingame</h3>
-      <div id="popup-cg-connect">
-        <button id="popup-tab-find-id" class="" action="tab_find_id" disabled  title="Find the CG id">Load CG id</button>
-        <div>CG ID : <span id="identifiers"></span></div>
       </div>
     </div>
   </div>
