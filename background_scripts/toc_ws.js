@@ -1,14 +1,14 @@
 class ToCWS {
   constructor () {
-    console.log('ToC WS')
-    this.ws = new WebSocket('ws://localhost:3000/cable')
+    if (_log) console.log('ToC WS')
+    this.ws = new WebSocket('ws://tournament-of-code.osc-fr1.scalingo.io//cable')
 
     this.ws.onopen = event => {
-      console.log('open', JSON.stringify(event))
+      if (_log) console.log('open', JSON.stringify(event))
 
       const channels = ['ContestantsChannel', 'TournamentsChannel']
       channels.forEach(channel => {
-        console.log(
+        if (_log) console.log(
           'sending subscription for channel',
           channel,
           JSON.stringify(event)
@@ -18,12 +18,12 @@ class ToCWS {
           identifier: JSON.stringify({ channel: 'ContestantsChannel' })
         }
         this.ws.send(JSON.stringify(subscribe_msg))
-        console.log('sent subscription', JSON.stringify(event))
+        if (_log) console.log('sent subscription', JSON.stringify(event))
       })
     }
 
-    this.ws.onmessage = event =>
-      console.log(
+    this.ws.onmessage = event => {
+      if (_log) console.log(
         'message [ ',
         JSON.stringify(event),
         ']',
@@ -34,14 +34,16 @@ class ToCWS {
         event.source,
         event.ports
       )
+    }
     this.ws.onerror = event => console.log('error', JSON.stringify(event))
-    this.ws.onclose = event =>
-      console.log(
+    this.ws.onclose = event => {
+      if (_log) console.log(
         'close',
         JSON.stringify(event),
         event.code,
         event.reason,
         event.wasClean
       )
+    }
   }
 }

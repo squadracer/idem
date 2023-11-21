@@ -34,7 +34,7 @@
     },
 
     tab_find_id: function () {
-      console.log('idem.js: tab_find_id')
+      if (_log) console.log('idem.js: tab_find_id')
       let fields
       const regex =
         /\"userId\":([0-9]+),.*,\"pseudo\":\"([^\"]+)\",.*,\"publicHandle\":\"([^\"]+)\"/

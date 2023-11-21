@@ -82,9 +82,9 @@ const actions = {
   },
 
   search_tournament: function () {
-    console.log('Searching tournaments...')
+    if (_log) console.log('Searching tournaments...')
     fetch_toc_api('/tournaments').then(data => {
-      console.log('Available tournaments :', data)
+      if (_log) console.log('Available tournaments :', data)
       _current_tournament = data.tournament
       if (!!_current_tournament) _joined_tournament = undefined
     })
@@ -98,7 +98,7 @@ const actions = {
   },
 
   join_tournament: function () {
-    console.log('Joining tournament')
+    if (_log) console.log('Joining tournament')
     fetch_toc_api(`/tournaments/${_current_tournament.id}/join`, 'POST', {
       contestant: {
         codingame_id: _cg_id.userId,
@@ -106,7 +106,7 @@ const actions = {
         codingame_public_handle: _cg_id.publicHandle
       }
     }).then(data => {
-      console.log(data)
+      if (_log) console.log(data)
       _joined_tournament = data.tournament
     })
   },
@@ -178,7 +178,7 @@ const actions = {
     })
   },
   update_tournament_status: function () {
-    console.log('update_tournament_status')
+    if (_log) console.log('update_tournament_status')
   }
 }
 

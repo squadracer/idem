@@ -292,7 +292,7 @@ browser.runtime.sendMessage(
 )
 
 function update_cg_id (message) {
-  console.log("show CG id");
+  if (_log) console.log("show CG id");
   document.querySelector('#identifiers').innerHTML =
     message.obj
       ? `${message.obj.pseudo} (${message.obj.userId}) - ${message.obj.publicHandle}`
@@ -304,9 +304,9 @@ browser.runtime.sendMessage({ command: 'get_cg_id' }, r => {
 })
 
 function update_tournaments () {
-  console.log('update_tournaments')
+  if (_log) console.log('update_tournaments')
   browser.runtime.sendMessage({ command: 'get_tournament_infos' }, r => {
-    console.log('get_tournament_infos response :', r)
+    if (_log) console.log('get_tournament_infos response :', r)
     if (r.res === 'obj') {
       const active = !!r.obj?.current_tournament?.id
       const joined = !!r.obj?.joined_tournament?.id
@@ -327,11 +327,9 @@ function update_action_pending (message) {
   pending.appendChild(span)
   const ul = document.createElement('ul')
   pending.appendChild(ul)
-  for (action of message.obj) {
+  for (const action of message.obj) {
     const li = document.createElement('li')
-    const actionName = Object.keys(action)[0];
-    const actionValue = Object.values(action)[0];
-    li.textContent = actionName + ": " + actionValue;
+    li.textContent = Object.entries(action).map(([k, v]) => `${k}: ${v}`).join(', ');
     ul.appendChild(li)
   }
 }
