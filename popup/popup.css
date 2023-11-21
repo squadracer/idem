@@ -13,6 +13,10 @@
   color: white;
 }
 
+#popup-log {
+  color: black;
+}
+
 body {
   background-color: #1D1F2B;
 }
