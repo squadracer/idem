@@ -40,14 +40,14 @@ class TwitchWS {
         // to try to get specific message
         // wss://pubsub-edge.twitch.tv/v1
         // https://dev.twitch.tv/docs/pubsub/
-        
+
         // _ws = new WebSocket(`ws://localhost:2000/`)
         //_ws = new WebSocket('wss://irc-ws.chat.twitch.tv:443'); const handler = twitch_chat_handler
         this.#_ws = new WebSocket('wss://pubsub-edge.twitch.tv/v1')
         // TODO. find a simple way to retrieve channel id from name
         // squadracer => 688213995
         this.#_topic = `community-points-channel-v1.${this.#_channel}`
-        
+
         this.#onOpen()
         this.#onMessage()
         this.#onError()
@@ -100,7 +100,7 @@ class TwitchWS {
 	#onOpen() {
         this.#_ws.onopen = event => {
             if (_log) console.log('open', JSON.stringify(event))
-    
+
             // just in case !
             clearInterval(this.#_heartbeatJob)
             // need to learn js more :)
@@ -116,7 +116,7 @@ class TwitchWS {
         this.#_ws.onmessage = event => {
             if (_log) console.log('message [ ', JSON.stringify(event), ']', event.data, '|', event.origin, event.lastEventId, event.source, event.ports)
             const data = JSON.parse(event.data)
-            
+
             switch(data.type) {
                 case 'RESPONSE':
                     if (data.nonce == 'only_one') {
@@ -142,20 +142,20 @@ class TwitchWS {
                         this.#processMessage(data.data.message)
                     }
                     break
-    
+
                 default:
                     console.warn('Unhandled message...', data)
                     break
             }
         }
 	}
-	
+
 	#onError() {
         this.#_ws.onerror = event => {
             console.log('error', JSON.stringify(event))
         }
 	}
-	
+
 	#onClose() {
         this.#_ws.onclose = event => {
             if (_log) console.log('close', JSON.stringify(event), event.code, event.reason, event.wasClean)

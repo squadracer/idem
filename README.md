@@ -1,11 +1,17 @@
 # idem
 
+## Supported browsers
+- [Firefox](https://addons.mozilla.org/fr/firefox/addon/idem/)
+
 ## What it does ##
 
 * connect to a tchat twich and listen specific commands
 * apply those commands in CG IDE
 * resize (double click) and move (hold click) code size div
 
+## Privacy ##
+
+For Codingame contest, your Codingame pseudo, id, publicHandle and solution will be sent.
 ## Commands available ##
 
 - Activate IDE
@@ -38,6 +44,8 @@
 - [ ] handle refresh ? restore current actions of current clash ? no for now !
 
 ## How to build ##
+
+This is only necessary to publish on extension store. For local development, import the manifest.
 ```bash
 sh build.sh
 ```
