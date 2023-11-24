@@ -2,6 +2,17 @@ let _ws, _twitch, _tabId, _ide, _log
 let _cg_id
 const SKIP_IDE_DETECTION = false
 const _buffer = []
+const TOC_URL = 'https://tournament-of-code.osc-fr1.scalingo.io/'
+let _current_tournament
+let _joined_tournament
+
+function fetch_toc_api (path, method = 'GET', payload) {
+  return fetch(`${TOC_URL}/api${path}`, {
+    method,
+    headers: { 'Content-Type': 'application/json' },
+    body: !!payload ? JSON.stringify(payload) : undefined
+  }).then(response => response.json())
+}
 
 const actions = {
   log_activate: function () {
@@ -29,25 +40,13 @@ const actions = {
   },
 
   tab_initialize: function () {
+    // init for this tab
     browser.tabs.query({ currentWindow: true, active: true }).then(tabs => {
       _tabId = tabs[0].id
       _ide = SKIP_IDE_DETECTION || tabs[0].url.includes('codingame.com/ide/')
       set_idem_logo({ tabId: _tabId })
-    })
-  },
-
-  tab_goto: function () {
-    if (_tabId) {
-      // highlight to keep current tab visible ?
-      browser.tabs.update(_tabId, { highlighted: true })
-    }
-  },
-
-  get_cg_id: function () {
-    return _cg_id
-  },
-
-  tab_find_id: function () {
+    });
+    // get and save CG id
     ensureScriptLoaded().then(() => {
       browser.tabs.sendMessage(
         _tabId,
@@ -67,8 +66,49 @@ const actions = {
     })
   },
 
+  tab_goto: function () {
+    if (_tabId) {
+      // highlight to keep current tab visible ?
+      browser.tabs.update(_tabId, { highlighted: true })
+    }
+  },
+
+  get_cg_id: function () {
+    return _cg_id
+  },
+
   action_get_buffer: function () {
     return _buffer
+  },
+
+  search_tournament: function () {
+    if (_log) console.log('Searching tournaments...')
+    fetch_toc_api('/tournaments').then(data => {
+      if (_log) console.log('Available tournaments :', data)
+      _current_tournament = data.tournament
+      if (!!_current_tournament) _joined_tournament = undefined
+    })
+  },
+
+  get_tournament_infos: function () {
+    return {
+      current_tournament: _current_tournament,
+      joined_tournament: _joined_tournament
+    }
+  },
+
+  join_tournament: function () {
+    if (_log) console.log('Joining tournament')
+    fetch_toc_api(`/tournaments/${_current_tournament.id}/join`, 'POST', {
+      contestant: {
+        codingame_id: _cg_id.userId,
+        name: _cg_id.pseudo,
+        codingame_public_handle: _cg_id.publicHandle
+      }
+    }).then(data => {
+      if (_log) console.log(data)
+      _joined_tournament = data.tournament
+    })
   },
 
   twitch_connect: function (channelName) {
@@ -155,6 +195,9 @@ const actions = {
     sendMessage({
       command: 'ide_deactivate_test'
     })
+  },
+  update_tournament_status: function () {
+    if (_log) console.log('update_tournament_status')
   }
 }
 
@@ -321,5 +364,9 @@ browser.runtime.onSuspend.addListener(e => {
 //browser.webNavigation.onCompleted.addListener(e => {
 //  console.log("navigation", e);
 //})
+
+actions.search_tournament()
+
+_toc_ws = new ToCWS()
 
 console.log('background loaded')

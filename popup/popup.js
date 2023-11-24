@@ -70,7 +70,6 @@ const actions = {
         log('DEBUG', r)
         if (r?.res == 'ack') {
           document.querySelector('#popup-tab-configured').disabled = false
-          document.querySelector('#popup-tab-find-id').disabled = false
           document.querySelector('#ide_manual_action_id').disabled = false
         }
       }
@@ -136,7 +135,32 @@ const actions = {
       }
     )
   },
-
+  join_tournament: function () {
+    browser.runtime.sendMessage(
+      {
+        command: 'join_tournament'
+      },
+      r => {
+        log('DEBUG', r)
+        if (r.res == 'ack') {
+          update_tournaments()
+        }
+      }
+    )
+  },
+  search_tournament: function () {
+    browser.runtime.sendMessage(
+      {
+        command: 'search_tournament'
+      },
+      r => {
+        log('DEBUG', r)
+        if (r.res == 'ack') {
+          update_tournaments()
+        }
+      }
+    )
+  },
   /////////////////////////////////////////////////////
   // ide
   ide_manual: function () {
@@ -231,7 +255,6 @@ browser.runtime.sendMessage(
     document.querySelector('#popup-tab-initialize').disabled = false
     if (r?.obj) {
       document.querySelector('#popup-tab-configured').disabled = false
-      document.querySelector('#popup-tab-find-id').disabled = false
       browser.tabs.query({ active: true, currentWindow: true }).then(tabs => {
         if (r.obj == tabs[0].id) {
           document.querySelector('#ide_manual_action_id').disabled = false
@@ -274,6 +297,7 @@ browser.runtime.sendMessage(
 )
 
 function update_cg_id (message) {
+  if (_log) console.log("show CG id");
   document.querySelector('#identifiers').innerHTML =
     message.obj
       ? `${message.obj.pseudo} (${message.obj.userId}) - ${message.obj.publicHandle}`
@@ -284,6 +308,21 @@ browser.runtime.sendMessage({ command: 'get_cg_id' }, r => {
   update_cg_id(r)
 })
 
+function update_tournaments () {
+  if (_log) console.log('update_tournaments')
+  browser.runtime.sendMessage({ command: 'get_tournament_infos' }, r => {
+    if (_log) console.log('get_tournament_infos response :', r)
+    if (r.res === 'obj') {
+      const active = !!r.obj?.current_tournament?.id
+      const joined = !!r.obj?.joined_tournament?.id
+      document.querySelector('#search_tournament_button').disabled = active
+      document.querySelector('#join_tournament_button').disabled =
+        joined || !active
+    }
+  })
+}
+update_tournaments()
+
 function update_action_pending (message) {
   if (!message?.obj?.length) return
   const pending = document.querySelector('#popup-ide-actions-pending')
@@ -293,9 +332,9 @@ function update_action_pending (message) {
   pending.appendChild(span)
   const ul = document.createElement('ul')
   pending.appendChild(ul)
-  for (action of message.obj) {
+  for (const action of message.obj) {
     const li = document.createElement('li')
-    li.textContent = JSON.stringify(action)
+    li.textContent = Object.entries(action).map(([k, v]) => `${k}: ${v}`).join(', ');
     ul.appendChild(li)
   }
 }
