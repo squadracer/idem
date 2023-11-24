@@ -15,6 +15,13 @@ function fetch_toc_api (path, method = 'GET', payload) {
 }
 
 const actions = {
+  share_code: function(code) {
+    console.log(`[ idem_bg ] shareCode: ${code}`);
+    // TODO: get Clash Public Handle from Content script and send it
+    // to link code to a Clash and not to a tournament
+    _toc_ws.sendMessage("CodesChannel", {codingame_id: _cg_id["userId"], code: code});
+  },
+
   log_activate: function () {
     _log = true
     if (!_tabId) return
