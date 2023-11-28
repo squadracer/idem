@@ -2,7 +2,7 @@ let _ws, _twitch, _tabId, _ide, _log
 let _cg_id
 const SKIP_IDE_DETECTION = false
 const _buffer = []
-const TOC_URL = 'https://tournament-of-code.osc-fr1.scalingo.io/'
+const TOC_URL = 'http://localhost:3000'
 let _current_tournament
 let _joined_tournament
 
