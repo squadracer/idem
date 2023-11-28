@@ -28,6 +28,18 @@
     }
   }
 
+  function shareCode(event) {
+    if (_log) console.log(`[ idem ] shareCode`);
+    if (event.detail.code !== undefined) {
+      browser.runtime.sendMessage({
+        command: 'share_code',
+        obj: event.detail.code
+      });
+    }
+  }
+
+  document.addEventListener('IDEToExternalEditor', shareCode);
+
   const actions = {
     get_status: function () {
       return 'content up'

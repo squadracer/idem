@@ -1,12 +1,14 @@
 class ToCWS {
+  #_ws
+
   constructor () {
     if (_log) console.log('ToC WS')
-    this.ws = new WebSocket('ws://tournament-of-code.osc-fr1.scalingo.io//cable')
+    this.#_ws = new WebSocket('ws://localhost:3000//cable')
 
-    this.ws.onopen = event => {
+    this.#_ws.onopen = event => {
       if (_log) console.log('open', JSON.stringify(event))
 
-      const channels = ['ContestantsChannel', 'TournamentsChannel']
+      const channels = ['ContestantsChannel', 'TournamentsChannel', 'CodesChannel']
       channels.forEach(channel => {
         if (_log) console.log(
           'sending subscription for channel',
@@ -15,14 +17,14 @@ class ToCWS {
         )
         const subscribe_msg = {
           command: 'subscribe',
-          identifier: JSON.stringify({ channel: 'ContestantsChannel' })
+          identifier: JSON.stringify({ channel: channel })
         }
-        this.ws.send(JSON.stringify(subscribe_msg))
+        this.#_ws.send(JSON.stringify(subscribe_msg))
         if (_log) console.log('sent subscription', JSON.stringify(event))
       })
     }
 
-    this.ws.onmessage = event => {
+    this.#_ws.onmessage = event => {
       if (_log) console.log(
         'message [ ',
         JSON.stringify(event),
@@ -35,8 +37,8 @@ class ToCWS {
         event.ports
       )
     }
-    this.ws.onerror = event => console.log('error', JSON.stringify(event))
-    this.ws.onclose = event => {
+    this.#_ws.onerror = event => console.log('error', JSON.stringify(event))
+    this.#_ws.onclose = event => {
       if (_log) console.log(
         'close',
         JSON.stringify(event),
@@ -45,5 +47,16 @@ class ToCWS {
         event.wasClean
       )
     }
+  }
+
+  sendMessage(channel, data) {
+    const msg = {
+      command: 'message',
+      identifier: JSON.stringify({
+        channel: channel
+      }),
+      data: JSON.stringify(data)
+    };
+    this.#_ws.send(JSON.stringify(msg));
   }
 }
