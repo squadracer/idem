@@ -14,6 +14,7 @@
   ],
   "background": {
     "scripts": [
+      "background_scripts/env.js",
       "background_scripts/toc_ws.js",
       "background_scripts/idem_ws.js",
       "background_scripts/idem_bg.js"

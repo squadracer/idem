@@ -1,8 +1,11 @@
-let _ws, _twitch, _tabId, _ide, _log
+
+const IS_DEV = typeof DEV_ENV !== 'undefined'
+let _toc_ws, _twitch, _tabId, _ide, _log = IS_DEV
 let _cg_id
 const SKIP_IDE_DETECTION = false
 const _buffer = []
-const TOC_URL = 'https://tournament-of-code.osc-fr1.scalingo.io/'
+const TOC_URL = IS_DEV ? 'http://localhost:3000' : 'https://tournament-of-code.osc-fr1.scalingo.io/'
+const TOC_WS_URL = IS_DEV ? 'ws://localhost:3000/cable' : 'wss://tournament-of-code.osc-fr1.scalingo.io/cable'
 let _current_tournament
 let _joined_tournament
 
@@ -45,25 +48,25 @@ const actions = {
       _tabId = tabs[0].id
       _ide = SKIP_IDE_DETECTION || tabs[0].url.includes('codingame.com/ide/')
       set_idem_logo({ tabId: _tabId })
+      // get and save CG id
+      ensureScriptLoaded().then(() => {
+        browser.tabs.sendMessage(
+          _tabId,
+          {
+            command: 'tab_find_id'
+          },
+          function (r) {
+            if (r.res === 'obj') _cg_id = r.obj
+            else _cg_id = undefined
+            // notify popup. This handle asynchronus problem of Promise
+            browser.runtime.sendMessage({
+              command: 'cg_id_change',
+              obj: _cg_id
+            })
+          }
+        )
+      })
     });
-    // get and save CG id
-    ensureScriptLoaded().then(() => {
-      browser.tabs.sendMessage(
-        _tabId,
-        {
-          command: 'tab_find_id'
-        },
-        function (r) {
-          if (r.res === 'obj') _cg_id = r.obj
-          else _cg_id = undefined
-          // notify popup. This handle asynchronus problem of Promise
-          browser.runtime.sendMessage({
-            command: 'cg_id_change',
-            obj: _cg_id
-          })
-        }
-      )
-    })
   },
 
   tab_goto: function () {
@@ -369,4 +372,4 @@ actions.search_tournament()
 
 _toc_ws = new ToCWS()
 
-console.log('background loaded')
+console.log(`background loaded (dev: ${IS_DEV})`)
