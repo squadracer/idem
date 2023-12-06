@@ -1,7 +1,7 @@
 class ToCWS {
   constructor () {
     if (_log) console.log('ToC WS')
-    this.ws = new WebSocket('ws://tournament-of-code.osc-fr1.scalingo.io//cable')
+    this.ws = new WebSocket(TOC_WS_URL)
 
     this.ws.onopen = event => {
       if (_log) console.log('open', JSON.stringify(event))
